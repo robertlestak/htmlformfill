@@ -1,6 +1,7 @@
 package htmlformfill
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -11,14 +12,15 @@ import (
 // Fill accepts an io.Reader for the HTML and map[string]string of the fields to be set
 // Parse html document, filling all fields as required
 // Returns filled html document as []byte
-func Fill(r io.Reader, f map[string]string) ([]byte, error) {
+func Fill(r io.Reader, f map[string]string) (*bytes.Reader, error) {
 	var out []byte
 	var e error
 	z := html.NewTokenizer(r)
 	for {
 		t := z.Next()
 		if t == html.ErrorToken {
-			return out, e
+			o := bytes.NewReader(out)
+			return o, e
 		}
 		n, _ := z.TagName()
 		o := z.Raw()

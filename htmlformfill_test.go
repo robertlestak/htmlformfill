@@ -23,12 +23,16 @@ func TestFill(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	sout, err := ioutil.ReadAll(out)
+	if err != nil {
+		t.Error(err)
+	}
 	for k, v := range f {
-		if !strings.Contains(string(out), v) {
+		if !strings.Contains(string(sout), v) {
 			t.Error("Error filling field: " + k)
 		}
 	}
-	werr := ioutil.WriteFile("./examples/test-output.html", out, 0644)
+	werr := ioutil.WriteFile("./examples/test-output.html", sout, 0644)
 	if werr != nil {
 		t.Error(werr)
 	}
