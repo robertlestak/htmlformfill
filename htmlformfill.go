@@ -9,6 +9,9 @@ import (
 	"golang.org/x/net/html"
 )
 
+const nameField = "name"
+const valField = "value"
+
 // Fill accepts an io.Reader for the HTML and map[string]string of the fields to be set
 // Parse html document, filling all fields as required
 // Returns filled html document as []byte
@@ -41,22 +44,20 @@ func Fill(r io.Reader, f map[string]string) (*bytes.Reader, error) {
 func input(z *html.Tokenizer, f map[string]string) []byte {
 	var out []byte
 	for {
-		key, val, m := z.TagAttr()
+		key, val, _ := z.TagAttr()
 		if string(key) == "type" && string(val) == "radio" {
 			out = radio(z, f)
 			break
 		} else if string(key) == "type" && string(val) == "checkbox" {
 			out = checkbox(z, f)
 			break
-		} else if kv, ok := f[string(val)]; string(key) == "name" && ok {
+		} else if kv, ok := f[string(val)]; string(key) == nameField && ok {
 			r := string(z.Raw())
 			r = strings.Replace(r, ">", fmt.Sprintf(" value=\"%s\">", kv), -1)
 			out = []byte(r)
+			break
 		} else {
 			out = z.Raw()
-		}
-		if !m {
-			break
 		}
 	}
 	return out
@@ -69,10 +70,10 @@ func radio(z *html.Tokenizer, f map[string]string) []byte {
 	var n string
 	for {
 		key, val, m := z.TagAttr()
-		if string(key) == "name" {
+		if string(key) == nameField {
 			n = string(val)
 		}
-		if string(key) == "value" && f[n] == string(val) {
+		if string(key) == valField && f[n] == string(val) {
 			r := string(z.Raw())
 			r = strings.Replace(r, ">", " checked>", -1)
 			out = []byte(r)
@@ -95,11 +96,11 @@ func checkbox(z *html.Tokenizer, f map[string]string) []byte {
 	var n string
 	for {
 		key, val, m := z.TagAttr()
-		if string(key) == "name" {
+		if string(key) == nameField {
 			n = string(val)
 		}
 		sel := strings.Split(f[n], ",")
-		if string(key) == "value" {
+		if string(key) == valField {
 			for _, v := range sel {
 				if string(val) == v {
 					r := string(z.Raw())
@@ -124,7 +125,7 @@ func textarea(z *html.Tokenizer, f map[string]string) []byte {
 	var out []byte
 	for {
 		key, val, m := z.TagAttr()
-		if kv, ok := f[string(val)]; string(key) == "name" && ok {
+		if kv, ok := f[string(val)]; string(key) == nameField && ok {
 			r := string(z.Raw())
 			r = strings.Replace(r, ">", ">"+kv, 1)
 			out = []byte(r)
@@ -145,7 +146,7 @@ func selector(z *html.Tokenizer, f map[string]string) []byte {
 	var n string
 	for {
 		key, val, m := z.TagAttr()
-		if _, ok := f[string(val)]; string(key) == "name" && ok {
+		if _, ok := f[string(val)]; string(key) == nameField && ok {
 			n = string(val)
 			out = append(out, z.Raw()...)
 		}
@@ -157,7 +158,7 @@ func selector(z *html.Tokenizer, f map[string]string) []byte {
 		z.Next()
 		for {
 			key, val, m := z.TagAttr()
-			if kv, ok := f[string(n)]; string(key) == "value" && ok {
+			if kv, ok := f[string(n)]; string(key) == valField && ok {
 				if kv == string(val) {
 					r := string(z.Raw())
 					r = strings.Replace(r, ">", " selected>", 1)
