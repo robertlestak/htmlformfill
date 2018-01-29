@@ -44,7 +44,7 @@ func Fill(r io.Reader, f map[string]string) (*bytes.Reader, error) {
 func input(z *html.Tokenizer, f map[string]string) []byte {
 	var out []byte
 	for {
-		key, val, _ := z.TagAttr()
+		key, val, m := z.TagAttr()
 		if string(key) == "type" && string(val) == "radio" {
 			out = radio(z, f)
 			break
@@ -55,8 +55,11 @@ func input(z *html.Tokenizer, f map[string]string) []byte {
 			r := string(z.Raw())
 			r = strings.Replace(r, ">", fmt.Sprintf(" value=\"%s\">", kv), -1)
 			out = []byte(r)
+		}
+		if !m {
 			break
-		} else {
+		}
+		if len(out) == 0 {
 			out = z.Raw()
 		}
 	}
