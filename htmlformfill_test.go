@@ -33,14 +33,8 @@ func TestFill(t *testing.T) {
 	}
 	for k, v := range f {
 		sv := strings.Split(v, ",")
-		if len(sv) > 0 {
-			for _, i := range sv {
-				if !strings.Contains(string(sout), i) {
-					t.Error("Error filling field: " + k)
-				}
-			}
-		} else {
-			if !strings.Contains(string(sout), v) {
+		for _, i := range sv {
+			if !strings.Contains(string(sout), i) {
 				t.Error("Error filling field: " + k)
 			}
 		}

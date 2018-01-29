@@ -99,7 +99,6 @@ func checkbox(z *html.Tokenizer, f map[string]string) []byte {
 			n = string(val)
 		}
 		sel := strings.Split(f[n], ",")
-
 		if string(key) == "value" {
 			for _, v := range sel {
 				if string(val) == v {
