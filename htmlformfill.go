@@ -42,8 +42,11 @@ func input(z *html.Tokenizer, f map[string]string) []byte {
 	var out []byte
 	for {
 		key, val, m := z.TagAttr()
-		if string(key) == "type" && (string(val) == "radio" || string(val) == "checkbox") {
-			out = checkInput(z, f)
+		if string(key) == "type" && string(val) == "radio" {
+			out = radio(z, f)
+			break
+		} else if string(key) == "type" && string(val) == "checkbox" {
+			out = checkbox(z, f)
 			break
 		} else if kv, ok := f[string(val)]; string(key) == "name" && ok {
 			r := string(z.Raw())
@@ -59,9 +62,9 @@ func input(z *html.Tokenizer, f map[string]string) []byte {
 	return out
 }
 
-// checkInput handles radio and checkbox inputs
+// radio handles radio inputs
 // Returns filled input row if found in f, original row if not found
-func checkInput(z *html.Tokenizer, f map[string]string) []byte {
+func radio(z *html.Tokenizer, f map[string]string) []byte {
 	var out []byte
 	var n string
 	for {
@@ -74,6 +77,37 @@ func checkInput(z *html.Tokenizer, f map[string]string) []byte {
 			r = strings.Replace(r, ">", " checked>", -1)
 			out = []byte(r)
 			break
+		}
+		if !m {
+			break
+		}
+	}
+	if len(out) == 0 {
+		out = z.Raw()
+	}
+	return out
+}
+
+// checkbox handles checkbox inputs
+// Returns filled input row if found in f, original row if not found
+func checkbox(z *html.Tokenizer, f map[string]string) []byte {
+	var out []byte
+	var n string
+	for {
+		key, val, m := z.TagAttr()
+		if string(key) == "name" {
+			n = string(val)
+		}
+		sel := strings.Split(f[n], ",")
+
+		if string(key) == "value" {
+			for _, v := range sel {
+				if string(val) == v {
+					r := string(z.Raw())
+					r = strings.Replace(r, ">", " checked>", -1)
+					out = []byte(r)
+				}
+			}
 		}
 		if !m {
 			break

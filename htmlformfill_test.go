@@ -13,7 +13,7 @@ func TestFill(t *testing.T) {
 	f["phone"] = "5555555"
 	f["textblock"] = "this is a longer block of text"
 	f["single-radio"] = "test1"
-	f["single-check"] = "test3"
+	f["multi-check"] = "test1,test3"
 	f["selector"] = "test2"
 	r, err := os.Open("./examples/form.html")
 	if err != nil {
@@ -27,13 +27,22 @@ func TestFill(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	for k, v := range f {
-		if !strings.Contains(string(sout), v) {
-			t.Error("Error filling field: " + k)
-		}
-	}
 	werr := ioutil.WriteFile("./examples/test-output.html", sout, 0644)
 	if werr != nil {
 		t.Error(werr)
+	}
+	for k, v := range f {
+		sv := strings.Split(v, ",")
+		if len(sv) > 0 {
+			for _, i := range sv {
+				if !strings.Contains(string(sout), i) {
+					t.Error("Error filling field: " + k)
+				}
+			}
+		} else {
+			if !strings.Contains(string(sout), v) {
+				t.Error("Error filling field: " + k)
+			}
+		}
 	}
 }
