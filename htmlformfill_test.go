@@ -13,6 +13,7 @@ func TestFill(t *testing.T) {
 	f["phone"] = "5555555"
 	f["textblock"] = "this is a longer block of text"
 	f["single-radio"] = "test1"
+	f["the-date"] = "2018-01-02"
 	f["multi-check"] = "test1,test3"
 	f["selector"] = "test2"
 	r, err := os.Open("./examples/form.html")
