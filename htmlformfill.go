@@ -132,6 +132,7 @@ func textarea(z *html.Tokenizer, f map[string]string) []byte {
 			r := string(z.Raw())
 			r = strings.Replace(r, ">", ">"+kv, 1)
 			out = []byte(r)
+			break
 		} else {
 			out = z.Raw()
 		}
